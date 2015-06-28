@@ -37,10 +37,10 @@ def get_stock_data(stock_code):
 
 #use yahoo web interface to get stock history data and store into xxx.csv file, xxx is stock number
 def update_stock_data_main(argv):
-    if 2 != len(argv) and 3 != len(argv):
+    if 2 > len(argv) and 4 < len(argv):
         print 'input parameter invalid'
         print argv
-        print 'e.g. python update_stock_data.py all_stock_code_list.txt'
+        print 'e.g. python update_stock_data.py all_stock_code_list.txt  [start line number] [line number]'
         exit(0)
     
     try:
@@ -50,27 +50,25 @@ def update_stock_data_main(argv):
         print 'e.g. python update_stock_data.py all_stock_code_list.txt'
         exit(0)
     
-    start_stock = ''
-    start_flag = 0
-    if 3 == len(argv):
-       start_stock = argv[2]
+    start_line = 0
+    end_line = 0
+    if 3 <=len(argv):
+       start_line = int(argv[2])
     
-    #set proxy address
-    #proxy_handler = urllib2.ProxyHandler({"http" : 'http://proxyconf.glb.nsn-net.net/proxy.pac'})
-    #opener = urllib2.build_opener(proxy_handler) 
-    #urllib2.install_opener(opener) 
-    #end
+    if 4 == len(argv):
+        end_line = int(argv[3])
+    
+    if 0 != end_line:
+        updatedstocklist = stock_list.readlines()[start_line:start_line + end_line]
+    else:
+        updatedstocklist = stock_list.readlines()[start_line:]
+
     update_succuss_list = []
     update_failed_list = []
-    for each_stock in stock_list:
+    for each_stock in updatedstocklist:
         res = re.match('^(\d{6})\s*\r\n', each_stock)
         if res is not None:
             stock_code = res.group(1)
-            if 0 == start_flag and '' != start_stock:
-                if start_stock == stock_code:
-                    start_flag = 1
-                else:
-                    continue
             status = get_stock_data(stock_code)
             if status  != 'success':
                 update_failed_list.append(stock_code)
@@ -91,6 +89,6 @@ def update_stock_data_main(argv):
     return update_succuss_list
     
 if __name__ == "__main__":
-    print 'e.g. python update_stock_data.py all_stock_code_list.txt'
+    print '''e.g. python update_stock_data.py all_stock_code_list.txt  [start line number] [line number]'''
     update_stock_data_main(sys.argv)
     
